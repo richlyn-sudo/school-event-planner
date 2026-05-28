@@ -1,6 +1,17 @@
+"use client";
+
 import "../style.css";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+
+  const router = useRouter();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    router.push("/dashboard");
+  };
 
   return (
 
@@ -51,31 +62,34 @@ export default function LoginPage() {
             Enter your email address & password to sign in
           </p>
 
-         <form className="login-form">
+          <form
+            className="login-form"
+            onSubmit={handleLogin}
+          >
 
-  <div className="input-box">
-    <span>📧</span>
+            <div className="input-box">
+              <span>📧</span>
 
-    <input
-      type="email"
-      placeholder="Email"
-    />
-  </div>
+              <input
+                type="email"
+                placeholder="Email"
+              />
+            </div>
 
-  <div className="input-box">
-    <span>🔒</span>
+            <div className="input-box">
+              <span>🔒</span>
 
-    <input
-      type="password"
-      placeholder="Password"
-    />
-  </div>
+              <input
+                type="password"
+                placeholder="Password"
+              />
+            </div>
 
-  <button type="submit">
-    Sign In
-  </button>
+            <button type="submit">
+              Sign In
+            </button>
 
-</form>
+          </form>
 
           <div className="login-links">
 
