@@ -2,15 +2,36 @@
 
 import "../style.css";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 
 export default function LoginPage() {
 
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (
+    e: React.FormEvent
+  ) => {
+
     e.preventDefault();
 
-    router.push("/dashboard");
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+    if (error) {
+      alert(error.message);
+    } else {
+
+      console.log("Logged in:", data);
+
+      router.push("/dashboard");
+    }
   };
 
   return (
@@ -68,21 +89,35 @@ export default function LoginPage() {
           >
 
             <div className="input-box">
+
               <span>📧</span>
 
               <input
                 type="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                required
               />
+
             </div>
 
             <div className="input-box">
+
               <span>🔒</span>
 
               <input
                 type="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                required
               />
+
             </div>
 
             <button type="submit">

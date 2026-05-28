@@ -1,6 +1,42 @@
+"use client";
+
 import "../style.css";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 
 export default function RegisterPage() {
+
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleRegister = async (
+    e: React.FormEvent
+  ) => {
+
+    e.preventDefault();
+
+    const { data, error } =
+      await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+    if (error) {
+
+      alert(error.message);
+
+    } else {
+
+      console.log("Registered:", data);
+
+      alert("Registration successful!");
+
+      router.push("/login");
+    }
+  };
 
   return (
 
@@ -12,16 +48,16 @@ export default function RegisterPage() {
         <div className="login-left">
 
           <h1>
-            Plan Better.
+            Create
             <br />
-            Collaborate
+            Your
             <br />
-            Smarter.
+            Account.
           </h1>
 
           <p>
-            A platform designed to help student organizations
-            and teachers plan school events.
+            Register to manage school events,
+            schedules, and tasks.
           </p>
 
           <div className="feature-list">
@@ -51,48 +87,48 @@ export default function RegisterPage() {
             Create your account
           </p>
 
-          <form className="login-form">
+          <form
+            className="login-form"
+            onSubmit={handleRegister}
+          >
 
-  <div className="input-box">
-    <span>👤</span>
+            <div className="input-box">
 
-    <input
-      type="text"
-      placeholder="Full Name"
-    />
-  </div>
+              <span>📧</span>
 
-  <div className="input-box">
-  <span>📧</span>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                required
+              />
 
-  <input
-    type="email"
-    placeholder="Email"
-  />
-</div>
+            </div>
 
-  <div className="input-box">
-    <span>🔒</span>
+            <div className="input-box">
 
-    <input
-      type="password"
-      placeholder="Password"
-    />
-  </div>
+              <span>🔒</span>
 
-  <button type="submit">
-    Register
-  </button>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                required
+              />
 
-</form>
-          <div className="login-links">
+            </div>
 
-            <p>
-              Already have an account?
-              <span> Login</span>
-            </p>
+            <button type="submit">
+              Register
+            </button>
 
-          </div>
+          </form>
 
         </div>
 
