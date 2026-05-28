@@ -2,12 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 import "../style.css";
 
 export default function DashboardPage() {
 
   const pathname = usePathname();
+  const [tasks, setTasks] = useState<any[]>([]);
 
+  // Fetch tasks from Supabase
+ useEffect(() => {
+  const fetchTasks = async () => {
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*");
+
+    console.log("SUPABASE DATA:", data);
+    console.log("SUPABASE ERROR:", error);
+
+    if (data) {
+      setTasks(data);
+    }
+  };
+
+  fetchTasks();
+}, []);
   return (
 
     <div className="container">
@@ -39,60 +59,24 @@ export default function DashboardPage() {
 
           <nav className="menu">
 
-            <Link
-              href="/dashboard"
-              className={`menu-item ${
-                pathname === "/dashboard"
-                  ? "active"
-                  : ""
-              }`}
-            >
-              <span>🏠</span>
-              Dashboard
+            <Link href="/dashboard" className={`menu-item ${pathname === "/dashboard" ? "active" : ""}`}>
+              <span>🏠</span> Dashboard
             </Link>
 
-            <Link
-              href="/tasks"
-              className={`menu-item ${
-                pathname === "/tasks"
-                  ? "active"
-                  : ""
-              }`}
-            >
-              <span>☑</span>
-              Tasks
+            <Link href="/tasks" className={`menu-item ${pathname === "/tasks" ? "active" : ""}`}>
+              <span>☑</span> Tasks
             </Link>
 
-            <Link
-              href="/schedule"
-              className={`menu-item ${
-                pathname === "/schedule"
-                  ? "active"
-                  : ""
-              }`}
-            >
-              <span>📅</span>
-              Schedule
+            <Link href="/schedule" className={`menu-item ${pathname === "/schedule" ? "active" : ""}`}>
+              <span>📅</span> Schedule
             </Link>
 
-            <Link
-              href="/budget"
-              className={`menu-item ${
-                pathname === "/budget"
-                  ? "active"
-                  : ""
-              }`}
-            >
-              <span>💰</span>
-              Budget
+            <Link href="/budget" className={`menu-item ${pathname === "/budget" ? "active" : ""}`}>
+              <span>💰</span> Budget
             </Link>
 
-            <a
-              href="#"
-              className="menu-item"
-            >
-              <span>👥</span>
-              Team
+            <a href="#" className="menu-item">
+              <span>👥</span> Team
             </a>
 
           </nav>
@@ -101,9 +85,7 @@ export default function DashboardPage() {
 
         <div className="user-profile">
 
-          <div className="avatar">
-            ST
-          </div>
+          <div className="avatar">ST</div>
 
           <div>
             <h4>Student</h4>
@@ -129,6 +111,7 @@ export default function DashboardPage() {
 
         </header>
 
+        {/* STATS - NOW DYNAMIC */}
         <section className="stats">
 
           <div className="card stat-card">
@@ -137,7 +120,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="card stat-card">
-            <h2>0</h2>
+            <h2>{tasks.length}</h2>
             <p>Tasks Pending</p>
           </div>
 
@@ -147,7 +130,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="card stat-card">
-            <h2>0</h2>
+            <h2>1</h2>
             <p>Team Members</p>
           </div>
 
@@ -155,23 +138,32 @@ export default function DashboardPage() {
 
         <section className="dashboard-grid">
 
+          {/* EVENTS */}
           <div className="left-panel card">
 
-            <div className="section-title">
-              <h3>Events</h3>
-            </div>
+  <div className="section-title">
+    <h3>Tasks Test</h3>
+  </div>
 
-            <div className="empty-box"></div>
+  {tasks.length === 0 ? (
+    <p>No tasks found</p>
+  ) : (
+    tasks.map((task) => (
+      <div key={task.id}>
+        <h4>{task.title}</h4>
+        <p>{task.status}</p>
+      </div>
+    ))
+  )}
 
-          </div>
+</div>
 
+          {/* SIDE */}
           <div className="right-panel">
 
             <div className="card side-card">
 
-              <h3>
-                Upcoming Deadlines
-              </h3>
+              <h3>Upcoming Deadlines</h3>
 
               <div className="empty-small"></div>
               <div className="empty-small"></div>
@@ -181,9 +173,7 @@ export default function DashboardPage() {
 
             <div className="card side-card">
 
-              <h3>
-                Recent Activity
-              </h3>
+              <h3>Recent Activity</h3>
 
               <div className="empty-small"></div>
               <div className="empty-small"></div>
