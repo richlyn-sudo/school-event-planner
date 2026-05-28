@@ -93,14 +93,13 @@ export default function LoginPage() {
               <span>📧</span>
 
               <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                required
-              />
+  type="email"
+  placeholder="Email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  required
+  style={{ color: "black" }}
+/>
 
             </div>
 
@@ -109,14 +108,13 @@ export default function LoginPage() {
               <span>🔒</span>
 
               <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
-                required
-              />
+  type="password"
+  placeholder="Password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  required
+  style={{ color: "black" }}
+/>
 
             </div>
 
