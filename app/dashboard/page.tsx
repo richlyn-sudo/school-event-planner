@@ -1,193 +1,268 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "../lib/supabaseClient";
-import "../style.css";
 
-export default function DashboardPage() {
+export default function Dashboard() {
+  const [showForm, setShowForm] = useState(false);
 
-  const pathname = usePathname();
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [venue, setVenue] = useState("");
+  const [eventDate, setEventDate] = useState("");
 
-  // Fetch tasks from Supabase
- useEffect(() => {
-  const fetchTasks = async () => {
-    const { data, error } = await supabase
-      .from("tasks")
-      .select("*");
+  const [events, setEvents] = useState<any[]>([]);
 
-    console.log("SUPABASE DATA:", data);
-    console.log("SUPABASE ERROR:", error);
+  // FETCH EVENTS
+  const fetchEvents = async () => {
+    const { data } = await supabase
+      .from("events")
+      .select("*")
+      .order("id", { ascending: false });
 
     if (data) {
-      setTasks(data);
+      setEvents(data);
     }
   };
 
-  fetchTasks();
-}, []);
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  // ADD EVENT
+  const addEvent = async () => {
+    const { error } = await supabase.from("events").insert([
+      {
+        title,
+        description,
+        venue,
+        event_date: eventDate,
+      },
+    ]);
+
+    if (error) {
+      console.log(error);
+      alert(error.message);
+    } else {
+      alert("Event Added!");
+
+      setTitle("");
+      setDescription("");
+      setVenue("");
+      setEventDate("");
+
+      setShowForm(false);
+
+      fetchEvents();
+    }
+  };
+
   return (
+    <div className="min-h-screen flex bg-gradient-to-br from-blue-500 to-purple-600">
 
-    <div className="container">
+      {/* SIDEBAR */}
+      <div className="w-[260px] bg-white/20 backdrop-blur-md shadow-xl p-6 border-r border-white/20">
 
-      <aside className="sidebar">
+        <h1 className="text-3xl font-bold text-white mb-2">
+          EventSync
+        </h1>
 
-        <div>
+        <p className="text-white/80 mb-8">
+          School Planner
+        </p>
 
-          <div className="logo-section">
+        {/* NAVIGATION */}
+        <div className="space-y-4">
 
-            <div className="logo-circle">
-              ⚡
-            </div>
+          <Link
+            href="/dashboard"
+            className="block p-3 rounded-xl bg-white text-blue-700 font-semibold"
+          >
+            🏠 Dashboard
+          </Link>
 
-            <div>
-              <h2>EventSync</h2>
-              <p>School Planner</p>
-            </div>
+          <Link
+            href="/tasks"
+            className="block p-3 rounded-xl hover:bg-white/20 text-white transition"
+          >
+            ☑ Tasks
+          </Link>
 
-          </div>
+          <Link
+            href="/schedule"
+            className="block p-3 rounded-xl hover:bg-white/20 text-white transition"
+          >
+            📅 Schedule
+          </Link>
 
-          <div className="school-card">
-            <span>INSTITUTION</span>
+          <Link
+            href="/budget"
+            className="block p-3 rounded-xl hover:bg-white/20 text-white transition"
+          >
+            💰 Budget
+          </Link>
 
-            <h3>
-              Pamantasan ng Lungsod ng San Pablo
-            </h3>
-          </div>
-
-          <nav className="menu">
-
-            <Link href="/dashboard" className={`menu-item ${pathname === "/dashboard" ? "active" : ""}`}>
-              <span>🏠</span> Dashboard
-            </Link>
-
-            <Link href="/tasks" className={`menu-item ${pathname === "/tasks" ? "active" : ""}`}>
-              <span>☑</span> Tasks
-            </Link>
-
-            <Link href="/schedule" className={`menu-item ${pathname === "/schedule" ? "active" : ""}`}>
-              <span>📅</span> Schedule
-            </Link>
-
-            <Link href="/budget" className={`menu-item ${pathname === "/budget" ? "active" : ""}`}>
-              <span>💰</span> Budget
-            </Link>
-
-            <a href="#" className="menu-item">
-              <span>👥</span> Team
-            </a>
-
-          </nav>
-
-        </div>
-
-        <div className="user-profile">
-
-          <div className="avatar">ST</div>
-
-          <div>
-            <h4>Student</h4>
-            <p>Student Org Member</p>
-          </div>
+          <Link
+            href="/team"
+            className="block p-3 rounded-xl hover:bg-white/20 text-white transition"
+          >
+            👥 Team
+          </Link>
 
         </div>
 
-      </aside>
+        {/* PROFILE */}
+        <div className="mt-10 bg-white/20 p-4 rounded-2xl">
 
-      <main className="main-content">
+          <h2 className="font-bold text-white">
+            Student
+          </h2>
 
-        <header className="topbar">
+          <p className="text-sm text-white/70">
+            Student Org Member
+          </p>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-10">
+
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-8">
 
           <div>
-            <h1>Dashboard</h1>
-            <p>A.Y. 2025-2026</p>
+            <h1 className="text-5xl font-bold text-white">
+              Dashboard
+            </h1>
+
+            <p className="text-white/80 mt-2">
+              A.Y. 2025-2026
+            </p>
           </div>
 
-          <button className="new-btn">
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="bg-white text-blue-700 px-6 py-3 rounded-2xl font-semibold hover:scale-105 transition"
+          >
             + New Event
           </button>
+        </div>
 
-        </header>
+        {/* STATS */}
+        <div className="grid grid-cols-4 gap-5 mb-8">
 
-        {/* STATS - NOW DYNAMIC */}
-        <section className="stats">
+          <div className="bg-white/90 p-6 rounded-3xl shadow-xl">
+            <h2 className="text-4xl font-bold text-black">
+              {events.length}
+            </h2>
 
-          <div className="card stat-card">
-            <h2>0</h2>
-            <p>Active Events</p>
+            <p className="text-gray-600 mt-2">
+              Active Events
+            </p>
           </div>
 
-          <div className="card stat-card">
-            <h2>{tasks.length}</h2>
-            <p>Tasks Pending</p>
+          <div className="bg-white/90 p-6 rounded-3xl shadow-xl">
+            <h2 className="text-4xl font-bold text-black">
+              1
+            </h2>
+
+            <p className="text-gray-600 mt-2">
+              Tasks Pending
+            </p>
           </div>
 
-          <div className="card stat-card">
-            <h2>₱0</h2>
-            <p>Budget Spent</p>
+          <div className="bg-white/90 p-6 rounded-3xl shadow-xl">
+            <h2 className="text-4xl font-bold text-black">
+              ₱0
+            </h2>
+
+            <p className="text-gray-600 mt-2">
+              Budget Spent
+            </p>
           </div>
 
-          <div className="card stat-card">
-            <h2>1</h2>
-            <p>Team Members</p>
+          <div className="bg-white/90 p-6 rounded-3xl shadow-xl">
+            <h2 className="text-4xl font-bold text-black">
+              1
+            </h2>
+
+            <p className="text-gray-600 mt-2">
+              Team Members
+            </p>
           </div>
+        </div>
 
-        </section>
+        {/* FORM */}
+        {showForm && (
+          <div className="bg-white/90 p-8 rounded-3xl shadow-xl mb-8 max-w-xl">
 
-        <section className="dashboard-grid">
+            <h2 className="text-3xl font-bold mb-6 text-black">
+              Create Event
+            </h2>
 
-          {/* EVENTS */}
-          <div className="left-panel card">
+            <input
+              className="w-full border p-3 mb-4 rounded-xl text-black"
+              placeholder="Event Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
 
-  <div className="section-title">
-    <h3>Tasks Test</h3>
-  </div>
+            <textarea
+              className="w-full border p-3 mb-4 rounded-xl text-black"
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
 
-  {tasks.length === 0 ? (
-    <p>No tasks found</p>
-  ) : (
-    tasks.map((task) => (
-      <div key={task.id}>
-        <h4>{task.title}</h4>
-        <p>{task.status}</p>
+            <input
+              className="w-full border p-3 mb-4 rounded-xl text-black"
+              placeholder="Venue"
+              value={venue}
+              onChange={(e) => setVenue(e.target.value)}
+            />
+
+            <input
+              type="date"
+              className="w-full border p-3 mb-6 rounded-xl text-black"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+            />
+
+            <button
+              onClick={addEvent}
+              className="bg-green-600 text-white px-6 py-3 rounded-2xl hover:scale-105 transition"
+            >
+              Save Event
+            </button>
+          </div>
+        )}
+
+        {/* EVENT LIST */}
+        <div className="grid md:grid-cols-2 gap-6">
+
+          {events.map((event) => (
+            <div
+              key={event.id}
+              className="bg-white/90 p-6 rounded-3xl shadow-xl"
+            >
+              <h2 className="text-3xl font-bold text-black">
+                {event.title}
+              </h2>
+
+              <p className="mt-4 text-gray-700">
+                {event.description}
+              </p>
+
+              <div className="mt-5 text-gray-600">
+                <p>📍 {event.venue}</p>
+                <p>📅 {event.event_date}</p>
+              </div>
+            </div>
+          ))}
+
+        </div>
       </div>
-    ))
-  )}
-
-</div>
-
-          {/* SIDE */}
-          <div className="right-panel">
-
-            <div className="card side-card">
-
-              <h3>Upcoming Deadlines</h3>
-
-              <div className="empty-small"></div>
-              <div className="empty-small"></div>
-              <div className="empty-small"></div>
-
-            </div>
-
-            <div className="card side-card">
-
-              <h3>Recent Activity</h3>
-
-              <div className="empty-small"></div>
-              <div className="empty-small"></div>
-              <div className="empty-small"></div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-      </main>
-
     </div>
-
   );
 }
