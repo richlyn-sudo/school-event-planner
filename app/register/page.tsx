@@ -9,8 +9,9 @@ export default function RegisterPage() {
 
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+ const [fullName, setFullName] = useState("");
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
 
   const handleRegister = async (
     e: React.FormEvent
@@ -18,11 +19,17 @@ export default function RegisterPage() {
 
     e.preventDefault();
 
-    const { data, error } =
-      await supabase.auth.signUp({
-        email,
-        password,
-      });
+  const { data, error } =
+  await supabase.auth.signUp({
+    email,
+    password,
+
+    options: {
+      data: {
+        full_name: fullName,
+      },
+    },
+  });
 
     if (error) {
 
@@ -92,21 +99,21 @@ export default function RegisterPage() {
             onSubmit={handleRegister}
           >
 
-            <div className="input-box">
+           <div className="input-box">
 
-              <span>📧</span>
+  <span>👤</span>
 
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                required
-              />
+  <input
+    type="text"
+    placeholder="Full Name"
+    value={fullName}
+    onChange={(e) =>
+      setFullName(e.target.value)
+    }
+    required
+  />
 
-            </div>
+</div>
 
             <div className="input-box">
 

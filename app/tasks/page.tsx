@@ -2,10 +2,100 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
 import "../style.css";
 export default function Home() {
 
   const pathname = usePathname();
+
+  const [selectedEvent, setSelectedEvent] = useState("all");
+
+  const [events, setEvents] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
+
+  const [showTaskForm, setShowTaskForm] = useState(false);
+
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskStatus, setTaskStatus] = useState("todo");
+  const [taskEvent, setTaskEvent] = useState("");
+  const fetchEvents = async () => {
+
+  const { data } = await supabase
+    .from("events")
+    .select("*");
+
+  if (data) {
+    setEvents(data);
+  }
+};
+
+const fetchTasks = async () => {
+
+  let query =
+    supabase.from("tasks").select("*");
+
+  if (selectedEvent !== "all") {
+    query = query.eq(
+      "event_id",
+      selectedEvent
+    );
+  }
+
+  const { data } = await query;
+
+  if (data) {
+    setTasks(data);
+  }
+};
+
+const addTask = async () => {
+
+  const { error } =
+    await supabase.from("tasks").insert([
+      {
+        title: taskTitle,
+        description: taskDescription,
+        status: taskStatus,
+        event_id: taskEvent,
+      },
+    ]);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  fetchTasks();
+
+  setTaskTitle("");
+  setTaskDescription("");
+  setTaskStatus("todo");
+  setTaskEvent("");
+
+  setShowTaskForm(false);
+};
+
+useEffect(() => {
+  fetchEvents();
+  fetchTasks();
+}, [selectedEvent]);
+
+const todoTasks =
+  tasks.filter(
+    (task) => task.status === "todo"
+  );
+
+const progressTasks =
+  tasks.filter(
+    (task) => task.status === "progress"
+  );
+
+const doneTasks =
+  tasks.filter(
+    (task) => task.status === "done"
+  );
 
   return (
     <div className="container">
@@ -105,17 +195,117 @@ export default function Home() {
 
           <div className="top-buttons">
 
-            <button className="filter-btn">
-              All Events
-            </button>
+  <select
+    className="filter-btn"
+    value={selectedEvent}
+    onChange={(e) =>
+      setSelectedEvent(e.target.value)
+    }
+  >
+    <option value="all">
+      All Events
+    </option>
 
-            <button className="new-btn">
-              + Add Task
-            </button>
+    {events.map((event) => (
+      <option
+        key={event.id}
+        value={event.id}
+      >
+        {event.title}
+      </option>
+    ))}
+  </select>
 
-          </div>
+  <button
+    className="new-btn"
+    onClick={() =>
+      setShowTaskForm(true)
+    }
+  >
+    + Add Task
+  </button>
+
+</div>
 
         </header>
+
+{showTaskForm && (
+
+<div className="card stat-card">
+
+  <h2>Create Task</h2>
+
+  <br />
+
+  <input
+    className="w-full border p-3 rounded-xl mb-3"
+    placeholder="Task Title"
+    value={taskTitle}
+    onChange={(e) =>
+      setTaskTitle(e.target.value)
+    }
+  />
+
+  <textarea
+    className="w-full border p-3 rounded-xl mb-3"
+    placeholder="Description"
+    value={taskDescription}
+    onChange={(e) =>
+      setTaskDescription(e.target.value)
+    }
+  />
+
+  <select
+    className="w-full border p-3 rounded-xl mb-3"
+    value={taskStatus}
+    onChange={(e) =>
+      setTaskStatus(e.target.value)
+    }
+  >
+    <option value="todo">
+      To Do
+    </option>
+
+    <option value="progress">
+      In Progress
+    </option>
+
+    <option value="done">
+      Done
+    </option>
+  </select>
+
+  <select
+    className="w-full border p-3 rounded-xl mb-3"
+    value={taskEvent}
+    onChange={(e) =>
+      setTaskEvent(e.target.value)
+    }
+  >
+    <option value="">
+      Select Event
+    </option>
+
+    {events.map((event) => (
+      <option
+        key={event.id}
+        value={event.id}
+      >
+        {event.title}
+      </option>
+    ))}
+  </select>
+
+  <button
+    className="new-btn"
+    onClick={addTask}
+  >
+    Save Task
+  </button>
+
+</div>
+
+)}
 
         {/* TASK COLUMNS */}
         <section className="task-columns">
@@ -123,76 +313,50 @@ export default function Home() {
           {/* TODO */}
           <div className="task-column">
 
-            <div className="column-header">
-              <h3>To Do</h3>
-              <span>4</span>
-            </div>
+            {todoTasks.map((task) => (
 
-            <div className="task-card">
-              <h4>Sample Task</h4>
-              <p>Task details here</p>
-            </div>
+<div
+  key={task.id}
+  className="task-card"
+>
+  <h4>{task.title}</h4>
+  <p>{task.description}</p>
+</div>
 
-            <div className="task-card">
-              <h4>Sample Task</h4>
-              <p>Task details here</p>
-            </div>
-
-            <div className="task-card">
-              <h4>Sample Task</h4>
-              <p>Task details here</p>
-            </div>
-
+))}
           </div>
 
           {/* IN PROGRESS */}
           <div className="task-column">
 
-            <div className="column-header">
-              <h3>In Progress</h3>
-              <span>3</span>
-            </div>
+            {progressTasks.map((task) => (
 
-            <div className="task-card">
-              <h4>Sample Task</h4>
-              <p>Task details here</p>
-            </div>
+<div
+  key={task.id}
+  className="task-card"
+>
+  <h4>{task.title}</h4>
+  <p>{task.description}</p>
+</div>
 
-            <div className="task-card">
-              <h4>Sample Task</h4>
-              <p>Task details here</p>
-            </div>
-
-            <div className="task-card">
-              <h4>Sample Task</h4>
-              <p>Task details here</p>
-            </div>
+))}
 
           </div>
 
           {/* DONE */}
           <div className="task-column">
 
-            <div className="column-header">
-              <h3>Done</h3>
-              <span>3</span>
-            </div>
+            {doneTasks.map((task) => (
 
-            <div className="task-card">
-              <h4>Sample Task</h4>
-              <p>Task details here</p>
-            </div>
+<div
+  key={task.id}
+  className="task-card"
+>
+  <h4>{task.title}</h4>
+  <p>{task.description}</p>
+</div>
 
-            <div className="task-card">
-              <h4>Sample Task</h4>
-              <p>Task details here</p>
-            </div>
-
-            <div className="task-card">
-              <h4>Sample Task</h4>
-              <p>Task details here</p>
-            </div>
-
+))}
           </div>
 
         </section>

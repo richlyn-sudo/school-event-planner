@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabaseClient";
 
 export default function Dashboard() {
+  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
 
   const [title, setTitle] = useState("");
@@ -13,6 +15,8 @@ export default function Dashboard() {
   const [eventDate, setEventDate] = useState("");
 
   const [events, setEvents] = useState<any[]>([]);
+  const [studentName, setStudentName] =
+  useState("Student");
 
   // FETCH EVENTS
   const fetchEvents = async () => {
@@ -27,9 +31,24 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+  fetchEvents();
 
+  const getUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      setStudentName(
+        user.user_metadata?.full_name ||
+        user.email ||
+        "Student"
+      );
+    }
+  };
+
+  getUser();
+}, []);
   // ADD EVENT
   const addEvent = async () => {
     const { error } = await supabase.from("events").insert([
@@ -57,7 +76,13 @@ export default function Dashboard() {
       fetchEvents();
     }
   };
+const handleLogout = async () => {
 
+  await supabase.auth.signOut();
+
+  router.push("/login");
+
+};
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-blue-500 to-purple-600">
 
@@ -115,14 +140,36 @@ export default function Dashboard() {
         {/* PROFILE */}
         <div className="mt-10 bg-white/20 p-4 rounded-2xl">
 
-          <h2 className="font-bold text-white">
-            Student
-          </h2>
+  <div className="flex items-center gap-3">
 
-          <p className="text-sm text-white/70">
-            Student Org Member
-          </p>
-        </div>
+    <div className="w-12 h-12 rounded-full bg-white text-blue-700 font-bold flex items-center justify-center">
+
+      {studentName.charAt(0).toUpperCase()}
+
+    </div>
+
+    <div>
+
+      <h2 className="font-bold text-white">
+        {studentName}
+      </h2>
+
+      <p className="text-sm text-white/70">
+        Student Org Member
+      </p>
+
+    </div>
+
+  </div>
+
+  <button
+    onClick={handleLogout}
+    className="mt-4 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl"
+  >
+    Logout
+  </button>
+
+</div>
       </div>
 
       {/* MAIN CONTENT */}
